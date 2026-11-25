@@ -1,0 +1,6 @@
+scale,size_gb,reads,sample_time_s,static_parts,adapt_parts,static_makespan_s,adapt_makespan_s,speedup_pct,straggler_reduc_pct,peak_skew_reduc_pct,status
+786 MB (Standard),0.77,2240000,5.74,50,89,51.57,45.27,12.23,18.8,27.99,Empirical
+1.09 GB (Big Data 1),1.09,3150000,10.06,50,68,71.4,62.1,13.02,21.4,25.91,Empirical
+5.02 GB (Big Data 2),5.02,15550000,68.7,50,68,252.3,215.5,14.56,24.5,28.45,Empirical
+15.0 GB (WGS Target),15.0,47200000,38.4,100,158,725.0,612.0,15.59,27.8,28.5,Validated Model
+100.0 GB (Full Genome 100GB),100.0,314500000,142.0,250,412,5120.0,4210.0,17.77,32.1,31.4,High-Throughput Projection

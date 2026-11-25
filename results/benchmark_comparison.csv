@@ -1,0 +1,5 @@
+Scenario,Makespan (s),Speedup,Runtime Reduction (%),Straggler Duration (s),Straggler Reduction (%),Cluster Utilization (%),Duration CV,Total Partitions
+1. Baseline (Static + FIFO),51.573,1.0,0.0,50.497,0.0,89.01,1.0606,50
+2. Static + HLPT,45.602,1.13,11.58,39.679,21.42,97.98,0.9297,50
+3. Adaptive + FIFO,45.922,1.12,10.96,44.845,11.19,98.09,0.5576,89
+4. Proposed (Adaptive + HLPT),45.267,1.14,12.23,41.002,18.8,98.82,0.5647,89

@@ -1,0 +1,72 @@
+# ==============================================================================
+# Git Ignore for Genomic BAM Coverage on Hadoop Project
+# ==============================================================================
+
+# Big Data Genomic Files (Too large for GitHub > 100 MB limit)
+# Note: Users can regenerate these locally anytime using data/stream_generate_15gb.py
+*.sam
+*.bam
+*.bai
+*.cram
+*.crai
+*.gz
+*.tar
+*.zip
+data/*.sam
+data/*.bam
+data/real_world/
+data/synthetic_alignments.sam
+data/alignments_1gb.sam
+data/alignments_5gb.sam
+data/alignments_15gb.sam
+data/alignments_100gb.sam
+
+# Keep BED files and test intervals
+!data/*.bed
+
+# Python Artifacts & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+
+# Jupyter & Editor files
+.ipynb_checkpoints
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS & Temporary Files
+.DS_Store
+Thumbs.db
+*.tmp
+scratch/
+
+# Model checkpoints (large binary dumps > 100MB)
+*.h5
+# Keep small joblib model files if under limit (workload_model.joblib is ~120KB)
+!results/workload_model.joblib

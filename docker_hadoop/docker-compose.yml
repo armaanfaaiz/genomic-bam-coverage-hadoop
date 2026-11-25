@@ -1,0 +1,173 @@
+# ==============================================================================
+# Heterogeneous Multi-Node Apache Hadoop Cluster (Docker Compose)
+# Final Year Project: Exact Genomic BAM Coverage on Heterogeneous Hadoop
+# ==============================================================================
+
+version: "3.8"
+
+networks:
+  hadoop-net:
+    driver: bridge
+
+volumes:
+  hadoop_namenode:
+  hadoop_datanode1:
+  hadoop_datanode2:
+  hadoop_datanode3:
+  hadoop_datanode4:
+
+services:
+  # ----------------------------------------------------------------------------
+  # Master Node: HDFS NameNode & YARN ResourceManager
+  # ----------------------------------------------------------------------------
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: hadoop-namenode
+    hostname: namenode
+    restart: always
+    ports:
+      - "9870:9870"     # HDFS NameNode Web UI
+      - "9000:9000"     # HDFS RPC Port
+    environment:
+      - CLUSTER_NAME=genomics-cluster
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+      - D:/Genomic_BAM_Coverage_Hadoop:/workspace
+    networks:
+      - hadoop-net
+
+  resourcemanager:
+    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
+    container_name: hadoop-resourcemanager
+    hostname: resourcemanager
+    restart: always
+    ports:
+      - "8088:8088"     # YARN ResourceManager Web UI
+    environment:
+      - SERVICE_PRECONDITION=namenode:9000 namenode:9870
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - YARN_CONF_yarn_resourcemanager_hostname=resourcemanager
+    volumes:
+      - D:/Genomic_BAM_Coverage_Hadoop:/workspace
+    depends_on:
+      - namenode
+    networks:
+      - hadoop-net
+
+  historyserver:
+    image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
+    container_name: hadoop-historyserver
+    hostname: historyserver
+    restart: always
+    ports:
+      - "19888:19888"   # Job History Web UI
+    environment:
+      - SERVICE_PRECONDITION=namenode:9000 resourcemanager:8088
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - YARN_CONF_yarn_resourcemanager_hostname=resourcemanager
+    depends_on:
+      - namenode
+      - resourcemanager
+    networks:
+      - hadoop-net
+
+  # ----------------------------------------------------------------------------
+  # Worker 1: High Capacity Node (1.8x Relative Capacity)
+  # ----------------------------------------------------------------------------
+  worker-1:
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    container_name: hadoop-worker-1
+    hostname: worker-1
+    restart: always
+    cpus: 2.0
+    mem_limit: 4096m
+    environment:
+      - SERVICE_PRECONDITION=namenode:9000 resourcemanager:8088
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - YARN_CONF_yarn_resourcemanager_hostname=resourcemanager
+      - YARN_CONF_yarn_nodemanager_resource_cpu__vcores=4
+      - YARN_CONF_yarn_nodemanager_resource_memory__mb=3584
+    volumes:
+      - hadoop_datanode1:/hadoop/dfs/data
+      - D:/Genomic_BAM_Coverage_Hadoop:/workspace
+    depends_on:
+      - namenode
+      - resourcemanager
+    networks:
+      - hadoop-net
+
+  # ----------------------------------------------------------------------------
+  # Worker 2: Standard Capacity Node (1.2x Relative Capacity)
+  # ----------------------------------------------------------------------------
+  worker-2:
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    container_name: hadoop-worker-2
+    hostname: worker-2
+    restart: always
+    cpus: 1.5
+    mem_limit: 3072m
+    environment:
+      - SERVICE_PRECONDITION=namenode:9000 resourcemanager:8088
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - YARN_CONF_yarn_resourcemanager_hostname=resourcemanager
+      - YARN_CONF_yarn_nodemanager_resource_cpu__vcores=3
+      - YARN_CONF_yarn_nodemanager_resource_memory__mb=2560
+    volumes:
+      - hadoop_datanode2:/hadoop/dfs/data
+      - D:/Genomic_BAM_Coverage_Hadoop:/workspace
+    depends_on:
+      - namenode
+      - resourcemanager
+    networks:
+      - hadoop-net
+
+  # ----------------------------------------------------------------------------
+  # Worker 3: Baseline Capacity Node (1.0x Relative Capacity)
+  # ----------------------------------------------------------------------------
+  worker-3:
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    container_name: hadoop-worker-3
+    hostname: worker-3
+    restart: always
+    cpus: 1.0
+    mem_limit: 2048m
+    environment:
+      - SERVICE_PRECONDITION=namenode:9000 resourcemanager:8088
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - YARN_CONF_yarn_resourcemanager_hostname=resourcemanager
+      - YARN_CONF_yarn_nodemanager_resource_cpu__vcores=2
+      - YARN_CONF_yarn_nodemanager_resource_memory__mb=1792
+    volumes:
+      - hadoop_datanode3:/hadoop/dfs/data
+      - D:/Genomic_BAM_Coverage_Hadoop:/workspace
+    depends_on:
+      - namenode
+      - resourcemanager
+    networks:
+      - hadoop-net
+
+  # ----------------------------------------------------------------------------
+  # Worker 4: Slow / Straggler Node (0.6x Relative Capacity)
+  # ----------------------------------------------------------------------------
+  worker-4:
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    container_name: hadoop-worker-4
+    hostname: worker-4
+    restart: always
+    cpus: 0.5
+    mem_limit: 1024m
+    environment:
+      - SERVICE_PRECONDITION=namenode:9000 resourcemanager:8088
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - YARN_CONF_yarn_resourcemanager_hostname=resourcemanager
+      - YARN_CONF_yarn_nodemanager_resource_cpu__vcores=1
+      - YARN_CONF_yarn_nodemanager_resource_memory__mb=896
+    volumes:
+      - hadoop_datanode4:/hadoop/dfs/data
+      - D:/Genomic_BAM_Coverage_Hadoop:/workspace
+    depends_on:
+      - namenode
+      - resourcemanager
+    networks:
+      - hadoop-net

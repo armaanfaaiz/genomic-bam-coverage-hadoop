@@ -1,0 +1,2 @@
+dataset,file_format,total_alignments,sample_time_s,static_blocks,adaptive_blocks,static_peak_load_ms,adaptive_peak_load_ms,skew_reduction_pct,static_fifo_makespan_s,adaptive_hlpt_makespan_s,speedup_pct,straggler_drop_pct
+1000 Genomes Project (NA12878 Chr20),Binary BAM (BGZF),3227627,104.36,64,108,2530.7,2526.4,0.17,39.02,36.86,5.53,5.87

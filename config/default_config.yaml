@@ -1,0 +1,64 @@
+# Configuration for Sampling-Guided ML-Based Adaptive Partitioning & Heterogeneity-Aware Scheduling
+# for Exact BAM Coverage Computation on Hadoop
+
+genomics:
+  chrom: "chr1"
+  region_length: 5000000         # 5 Mbp synthetic chromosome simulation
+  default_static_chunk_size: 100000   # 100 kbp per static partition
+  min_partition_size: 20000          # 20 kbp minimum to avoid excessive task fragmentation
+  max_partition_size: 250000         # 250 kbp maximum
+  sampling_fraction: 0.05            # 5% sampling for fast feature extraction
+  mean_read_length: 150
+  depth_mean: 30.0
+  skew_hotspots:
+    - [800000, 1400000, 5.0]        # [start, end, multiplier for coverage skew]
+    - [2500000, 3100000, 4.0]
+    - [4200000, 4600000, 6.0]
+
+workload_prediction:
+  model_type: "random_forest"       # options: "random_forest", "gradient_boosting"
+  rf_n_estimators: 100
+  rf_max_depth: 12
+  random_state: 42
+  features:
+    - "sampled_read_count"
+    - "read_density"
+    - "estimated_mean_depth"
+    - "cigar_mismatch_rate"
+    - "indel_frequency"
+    - "mean_mapq"
+    - "gc_content"
+    - "region_span"
+
+adaptive_partitioning:
+  split_threshold_percentile: 75    # Regions above 75th percentile predicted runtime are split
+  max_splits_per_region: 4
+  balance_tolerance: 0.15
+
+cluster_heterogeneity:
+  # Simulated heterogeneous Hadoop cluster nodes
+  # capacity_factor: relative processing power (1.0 = baseline worker)
+  workers:
+    - id: "worker_node_1"
+      capacity_factor: 1.8   # High-performance node (e.g., 32-core Xeon)
+      cores: 8
+    - id: "worker_node_2"
+      capacity_factor: 1.2   # Standard node (e.g., 16-core)
+      cores: 4
+    - id: "worker_node_3"
+      capacity_factor: 1.0   # Baseline node
+      cores: 4
+    - id: "worker_node_4"
+      capacity_factor: 0.6   # Slower / legacy node (e.g., older CPU)
+      cores: 2
+
+scheduling:
+  algorithm: "HLPT"                 # Options: "HLPT", "LPT", "FIFO", "ROUND_ROBIN"
+
+mapreduce:
+  mode: "exact_base_depth"          # Calculates exact coverage depth per base
+  output_format: "bedgraph"         # chrom, start, end, depth
+
+evaluation:
+  output_dir: "results"
+  save_plots: true

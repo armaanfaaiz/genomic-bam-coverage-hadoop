@@ -1,0 +1,40 @@
+# Google Cloud Platform (GCP) Dataproc Configuration
+# for Heterogeneous Hadoop Exact BAM Coverage Computation
+
+gcp:
+  project_id: "your-gcp-project-id"        # Replace with your GCP project ID
+  region: "us-central1"
+  zone: "us-central1-a"
+  bucket_name: "genomics-hadoop-15gb"      # GCS bucket for alignments and code
+
+dataproc:
+  cluster_name: "genomics-hetero-cluster"
+  image_version: "2.1-debian11"            # Apache Hadoop 3.3.5
+  num_workers: 4
+  
+  # Heterogeneous node configuration
+  master_config:
+    machine_type: "e2-standard-4"          # 4 vCPU, 16 GB RAM
+    boot_disk_size_gb: 100
+
+  # Worker node specifications simulating node heterogeneity
+  worker_config:
+    machine_type: "n2-standard-4"          # 4 vCPU, 16 GB RAM (Baseline worker)
+    boot_disk_size_gb: 150
+  
+  secondary_worker_config:                 # Preemptible / spot / heterogeneous burst nodes
+    num_workers: 2
+    machine_type: "e2-standard-2"          # Slower tier nodes (2 vCPU, 8 GB RAM)
+
+storage:
+  input_sam_path: "gs://genomics-hadoop-15gb/data/alignments_15gb.sam"
+  mapper_script_path: "gs://genomics-hadoop-15gb/scripts/mapper.py"
+  reducer_script_path: "gs://genomics-hadoop-15gb/scripts/reducer.py"
+  output_coverage_dir: "gs://genomics-hadoop-15gb/results/output_bedgraph"
+
+cost_estimation:
+  master_cost_per_hr: 0.134                # e2-standard-4 (~$0.134/hr)
+  worker_cost_per_hr: 0.197                # n2-standard-4 (~$0.197/hr)
+  dataproc_fee_per_vcpu_hr: 0.010          # ~$0.010 per vCPU-hr
+  estimated_15gb_job_duration_mins: 15     # 15 minutes for 15GB on 4-8 nodes
+  estimated_total_cloud_cost_usd: 0.85     # Under $1.00 per full test run!
